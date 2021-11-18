@@ -205,10 +205,8 @@ void control_setting()
 						dir = RIGHT;
 					}
 					else if (eventBuffer[i].Event.KeyEvent.uChar.AsciiChar == 'f') {
-						system("pause");
-
-						//dir = STOP;
-						
+						//system("pause");
+						dir = STOP;
 					}
 				}
 				else if (mainmenu == true)
