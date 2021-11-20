@@ -1,0 +1,30 @@
+#pragma once
+
+int setConsole(int, int);
+int setMode();
+void fill_buffer_to_console();
+void fill_food();
+void clear_buffer();
+void initfood();
+void initwall();
+void fill_wall();
+void init_oji();
+void fill_oji();
+void oji_move();
+void board();
+void eatcheck();
+void addtail();
+void setcursor(bool);
+void selfhits();
+void game_setup();
+void control_setting();
+void myname();
+void scorecount();
+void normalModegame();
+void menuascii();
+void modepage();
+void gameoverpage();
+void howtoplaypage();
+void gameplaypage();
+void leaderboardpage();
+void savescore();

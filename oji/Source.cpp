@@ -4,7 +4,16 @@
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
+#include "ScoreList.h"
+#include "functions.h"
 using namespace std;
+
+/*
+ Oji's 
+ the snake game
+ dev by Amree Thaowan 
+ 64011013 KMITL
+*/
 
 //setcosole
 #define screen_x 60
@@ -29,32 +38,7 @@ DWORD numEvents = 0;
 DWORD numEventsRead = 0;
 
 //function
-int setConsole(int, int);
-int setMode();
-void fill_buffer_to_console();
-void fill_food();
-void clear_buffer();
-void initfood();
-void initwall();
-void fill_wall();
-void init_oji();
-void fill_oji();
-void oji_move();
-void board();
-void eatcheck();
-void addtail();
-void setcursor(bool);
-void selfhits();
-void game_setup();
-void control_setting();
-void myname();
-void scorecount();
-void normalModegame();
-void menuascii();
-void modepage();
-void gameoverpage();
-void howtoplaypage();
-void gameplaypage();
+
 //food
 #define count 100
 COORD food[count];
@@ -71,18 +55,67 @@ enum directions {UP, DOWN, LEFT, RIGHT, STOP};
 directions dir;
 
 
-bool GameOn = true, mainmenu, modemenu, normalMode, obstructMode, play, Gameover = false, howtoplay;
+bool GameOn = true, mainmenu, modemenu, normalMode, obstructMode, play, Gameover = false, howtoplay, leaderboard, obsboard, challengeboard;
 float speed;
 int HP, score, obHighscore;
 int mainpy = 15, modepy = 11, gameoverpy = 16;
-enum itemlist {SLOWER, ADDHP, SHORTER, DEWALL};
+enum itemlist {SLOWER, ADDHP, SHORTER, DELWALL};
 itemlist items;
+int runround = 0;
+string name;
+
 
 int main()
 {
+	cout << "Enter your name : ";
+	getline(cin, name);
 	game_setup();
 	while (GameOn)
 	{
+		while (leaderboard == true)
+		{
+			control_setting();
+			while (runround == 0)
+			{
+				clear_buffer();
+				fill_buffer_to_console();
+				ScoreList score_list(".txt");
+				score_list.loadFile();
+				score_list.printEntry();
+				score_list.saveFile();
+				runround++;
+			}
+		}
+		/*
+		while (challengeboard == true)
+		{
+			control_setting();
+			while (runround == 0)
+			{
+				clear_buffer();
+				fill_buffer_to_console();
+				ScoreList score_list("ChallengeScore.txt");
+				score_list.loadFile();
+				score_list.printEntry();
+				score_list.saveFile();
+				runround++;
+			}
+		}
+		while (obsboard == true)
+		{
+			control_setting();
+			while (runround == 0)
+			{
+				clear_buffer();
+				fill_buffer_to_console();
+				ScoreList score_list("ObstructionScore.txt");
+				score_list.loadFile();
+				score_list.printEntry();
+				score_list.saveFile();
+				runround++;
+			}
+		}
+		*/
 		while (howtoplay == true)
 		{
 			control_setting();
@@ -136,25 +169,28 @@ void game_setup()
 {
 	setcursor(0);
 	srand(time(NULL));
+	setMode();
+	setConsole(screen_x, screen_y);
 	mainmenu = true;
 	play = false;
 	modemenu = false;
 	normalMode = false;
 	obstructMode = false;
 	wallstat = false;
+	leaderboard = false;
+	obsboard = false;
+	challengeboard = false;
 	HP = 2;
 	foodcount = 1;
 	wallcount = 0;
 	atefood = 3;
-	setConsole(screen_x, screen_y);
-	setMode();
+	Tlenght = 1;
+	speed = 80;
+	score = 0;
+	dir = STOP;
 	init_oji();
 	initfood();
 	initwall();
-	Tlenght = 1;
-	dir = STOP;
-	speed = 80;
-	score = 0;
 }
 
 void normalModegame()
@@ -168,9 +204,9 @@ void normalModegame()
 	board();
 	eatcheck();
 	selfhits();
-	fill_oji();
 	fill_food();
 	fill_wall();
+	fill_oji();
 	fill_buffer_to_console(); // fill
 	Sleep(speed);
 }
@@ -229,7 +265,12 @@ void control_setting()
 							mainmenu = false;
 							modemenu = true;
 						}
-						//else if (mainpy == 17)
+						else if (mainpy == 17)
+						{
+							runround = 0;
+							mainmenu = false;
+							leaderboard = true;
+						}
 						else if (mainpy == 19)
 						{
 							mainmenu = false;
@@ -275,6 +316,14 @@ void control_setting()
 							modemenu = false;
 							mainmenu = true;
 						}
+					}
+				}
+				else if (leaderboard == true)
+				{
+					if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
+					{
+						mainmenu = true;
+						leaderboard = false;
 					}
 				}
 				else if (Gameover == true)
@@ -442,6 +491,7 @@ void oji_move()
 			HP--;
 			if (HP == 0) {
 				Sleep(100);
+				savescore();
 				Gameover = true;
 				normalMode = false;
 				play = false;
@@ -465,6 +515,7 @@ void oji_move()
 			HP--;
 			if (HP == 0) {
 				Sleep(100);
+				savescore();
 				Gameover = true;
 				normalMode = false;
 				play = false;
@@ -488,6 +539,7 @@ void oji_move()
 			HP--;
 			if (HP == 0) {
 				Sleep(100);
+				savescore();
 				Gameover = true;
 				normalMode = false;
 				play = false;
@@ -511,6 +563,7 @@ void oji_move()
 			HP--;
 			if (HP == 0) {
 				Sleep(100);
+				savescore();
 				Gameover = true;
 				normalMode = false;
 				play = false;
@@ -569,6 +622,7 @@ void eatcheck()
 			HP--;
 			if (HP == 0)
 			{
+				savescore();
 				play = false;
 				normalMode = false;
 				Gameover = true;
@@ -587,6 +641,7 @@ void selfhits()
 			if (HP == 0)
 			{
 				Sleep(250);
+				savescore();
 				normalMode = false;
 				play = false;
 				Gameover = true;
@@ -615,6 +670,24 @@ void addtail()
 			fposX = sposX;
 			fposY = sposY;
 		}
+	}
+}
+
+void savescore()
+{
+	if (wallstat == false)
+	{
+		ScoreList score_list("ChallengeScore.txt");
+		score_list.loadFile();
+		score_list.addEntry(name, score);
+		score_list.saveFile();
+	}
+	else
+	{
+		ScoreList score_list("ObstructionScore.txt");
+		score_list.loadFile();
+		score_list.addEntry(name, score);
+		score_list.saveFile();
 	}
 }
 
