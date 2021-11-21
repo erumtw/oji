@@ -28,3 +28,4 @@ void howtoplaypage();
 void gameplaypage();
 void leaderboardpage();
 void savescore();
+void boardpage();

@@ -1,4 +1,5 @@
-﻿#include <iostream>
+#pragma once
+#include <iostream>
 #include <stdlib.h>
 #include <string>
 #include <windows.h>
@@ -6,14 +7,8 @@
 #include <conio.h>
 #include "ScoreList.h"
 #include "functions.h"
-using namespace std;
 
-/*
- Oji's 
- the snake game
- dev by Amree Thaowan 
- 64011013 KMITL
-*/
+using namespace std;
 
 //setcosole
 #define screen_x 60
@@ -51,119 +46,18 @@ int wallcount;
 //Oji
 COORD oji[lenght];
 int Tlenght;
-enum directions {UP, DOWN, LEFT, RIGHT, STOP};
+enum directions { UP, DOWN, LEFT, RIGHT, STOP };
 directions dir;
 
 
 bool GameOn = true, mainmenu, modemenu, normalMode, obstructMode, play, Gameover = false, howtoplay, leaderboard, obsboard, challengeboard;
 float speed;
-int HP, score, obHighscore;
-int mainpy = 15, modepy = 11, gameoverpy = 16;
-enum itemlist {SLOWER, ADDHP, SHORTER, DELWALL};
+int HP, score;
+int mainpy = 15, modepy = 11, gameoverpy = 16, leaderpy = 12;
+enum itemlist { SLOWER, ADDHP, SHORTER, DELWALL };
 itemlist items;
 int runround = 0;
 string name;
-
-
-int main()
-{
-	cout << "Enter your name : ";
-	getline(cin, name);
-	game_setup();
-	while (GameOn)
-	{
-		while (leaderboard == true)
-		{
-			control_setting();
-			while (runround == 0)
-			{
-				clear_buffer();
-				fill_buffer_to_console();
-				ScoreList score_list(".txt");
-				score_list.loadFile();
-				score_list.printEntry();
-				score_list.saveFile();
-				runround++;
-			}
-		}
-		/*
-		while (challengeboard == true)
-		{
-			control_setting();
-			while (runround == 0)
-			{
-				clear_buffer();
-				fill_buffer_to_console();
-				ScoreList score_list("ChallengeScore.txt");
-				score_list.loadFile();
-				score_list.printEntry();
-				score_list.saveFile();
-				runround++;
-			}
-		}
-		while (obsboard == true)
-		{
-			control_setting();
-			while (runround == 0)
-			{
-				clear_buffer();
-				fill_buffer_to_console();
-				ScoreList score_list("ObstructionScore.txt");
-				score_list.loadFile();
-				score_list.printEntry();
-				score_list.saveFile();
-				runround++;
-			}
-		}
-		*/
-		while (howtoplay == true)
-		{
-			control_setting();
-			clear_buffer();
-			howtoplaypage();
-			consoleBuffer[40 + screen_x * 23].Char.AsciiChar = '<';
-			consoleBuffer[40 + screen_x * 23].Attributes = 3;;
-			fill_buffer_to_console();
-			Sleep(160);
-		}
-		while (Gameover == true)
-		{
-			control_setting();
-			clear_buffer();
-			gameoverpage();
-			consoleBuffer[40 + screen_x * gameoverpy].Char.AsciiChar = '<';
-			consoleBuffer[40 + screen_x * gameoverpy].Attributes = 3;
-			fill_buffer_to_console();
-			Sleep(160);
-		}
-		while (mainmenu == true)
-		{
-			control_setting();
-			clear_buffer(); // clear
-			menuascii();
-			consoleBuffer[37 + screen_x * mainpy].Char.AsciiChar = '<';
-			consoleBuffer[37 + screen_x * mainpy].Attributes = 3;
-			fill_buffer_to_console();
-			Sleep(160);
-		}
-		while (modemenu == true)
-		{
-			control_setting();
-			clear_buffer();
-			modepage();
-			consoleBuffer[39 + screen_x * modepy].Char.AsciiChar = '<';
-			consoleBuffer[39 + screen_x * modepy].Attributes = 3;
-			fill_buffer_to_console();
-			Sleep(160);
-		}
-		while (normalMode == true)
-		{
-			normalModegame();
-		}
-	}
-	return 0;
-}
-
 
 void game_setup()
 {
@@ -241,7 +135,6 @@ void control_setting()
 						dir = RIGHT;
 					}
 					else if (eventBuffer[i].Event.KeyEvent.uChar.AsciiChar == 'f') {
-						//system("pause");
 						dir = STOP;
 					}
 				}
@@ -267,7 +160,6 @@ void control_setting()
 						}
 						else if (mainpy == 17)
 						{
-							runround = 0;
 							mainmenu = false;
 							leaderboard = true;
 						}
@@ -296,6 +188,7 @@ void control_setting()
 					}
 					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
+						speed = 80;
 						if (modepy == 11)
 						{
 							//game_setup();
@@ -320,10 +213,45 @@ void control_setting()
 				}
 				else if (leaderboard == true)
 				{
+					if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_UP)
+					{
+						if (leaderpy != 12)
+							leaderpy -= 2;
+					}
+					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_DOWN)
+					{
+						if (leaderpy != 16)
+							leaderpy += 2;
+					}
+					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
+					{
+						if (leaderpy == 12)
+						{
+							runround = 0;
+							leaderboard = false;
+							challengeboard = true;
+						}
+						else if (leaderpy == 14)
+						{
+							runround = 0;
+							leaderboard = false;
+							obsboard = true;
+						}
+						else if (leaderpy == 16)
+						{
+							runround = 0;
+							leaderboard = false;
+							mainmenu = true;
+						}
+					}
+				}
+				else if (obsboard == true || challengeboard == true)
+				{
 					if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
-						mainmenu = true;
-						leaderboard = false;
+						if (obsboard == true) { obsboard = false; }	
+						else if (challengeboard == true) { challengeboard = false; }
+						leaderboard = true;
 					}
 				}
 				else if (Gameover == true)
@@ -389,6 +317,11 @@ int setMode()
 	return 0;
 }
 
+void gotoxy(int x, int y)
+{
+	COORD c = { x, y };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
+}
 void fill_food()
 {
 	for (int i = 0; i < foodcount; i++)
@@ -525,7 +458,7 @@ void oji_move()
 	}
 
 	else if (dir == LEFT) {
-		if(oji[0].X > 1)
+		if (oji[0].X > 1)
 		{
 			oji[0].X -= 1;
 		}
@@ -549,7 +482,7 @@ void oji_move()
 	}
 
 	else if (dir == RIGHT) {
-		if (oji[0].X < width -2)
+		if (oji[0].X < width - 2)
 		{
 			oji[0].X += 1;
 		}
@@ -579,7 +512,7 @@ void board()
 	{
 		for (int j = 0; j < width; j++) // column
 		{
-			if (i == 0 || i == height - 1 || j == 0 || j == width - 1 )
+			if (i == 0 || i == height - 1 || j == 0 || j == width - 1)
 			{
 				consoleBuffer[j + screen_x * i].Char.AsciiChar = '#';
 				consoleBuffer[j + screen_x * i].Attributes = 10;
@@ -1022,46 +955,101 @@ void howtoplaypage()
 		consoleBuffer[(((60 - strlen(topic)) / 2) + i) + screen_x * (py + 0)].Char.AsciiChar = topic[i];
 		consoleBuffer[(((60 - strlen(topic)) / 2) + i) + screen_x * (py + 0)].Attributes = 7;
 	}
-
 	for (size_t i = 0; i < strlen(line1); i++)
 	{
 		consoleBuffer[(((60 - strlen(line1)) / 2) + i) + screen_x * (py + 3)].Char.AsciiChar = line1[i];
 		consoleBuffer[(((60 - strlen(line1)) / 2) + i) + screen_x * (py + 3)].Attributes = 7;
 	}
-
 	for (size_t i = 0; i < strlen(line2); i++)
 	{
 		consoleBuffer[(((60 - strlen(line2)) / 2) + i) + screen_x * (py + 5)].Char.AsciiChar = line2[i];
 		consoleBuffer[(((60 - strlen(line2)) / 2) + i) + screen_x * (py + 5)].Attributes = 7;
 	}
-
 	for (size_t i = 0; i < strlen(line3); i++)
 	{
 		consoleBuffer[(((60 - strlen(line3)) / 2) + i) + screen_x * (py + 7)].Char.AsciiChar = line3[i];
 		consoleBuffer[(((60 - strlen(line3)) / 2) + i) + screen_x * (py + 7)].Attributes = 7;
 	}
-
 	for (size_t i = 0; i < strlen(line4); i++)
 	{
 		consoleBuffer[(((60 - strlen(line4)) / 2) + i) + screen_x * (py + 9)].Char.AsciiChar = line4[i];
 		consoleBuffer[(((60 - strlen(line4)) / 2) + i) + screen_x * (py + 9)].Attributes = 7;
 	}
-
 	for (size_t i = 0; i < strlen(line5); i++)
 	{
 		consoleBuffer[(((60 - strlen(line5)) / 2) + i) + screen_x * (py + 11)].Char.AsciiChar = line5[i];
 		consoleBuffer[(((60 - strlen(line5)) / 2) + i) + screen_x * (py + 11)].Attributes = 7;
 	}
-
 	for (size_t i = 0; i < strlen(line6); i++)
 	{
 		consoleBuffer[(((60 - strlen(line6)) / 2) + i) + screen_x * (py + 13)].Char.AsciiChar = line6[i];
 		consoleBuffer[(((60 - strlen(line6)) / 2) + i) + screen_x * (py + 13)].Attributes = 7;
 	}
-
 	for (size_t i = 0; i < strlen(line7); i++)
 	{
 		consoleBuffer[(((60 - strlen(line7)) / 2) + i) + screen_x * (py + 20)].Char.AsciiChar = line7[i];
 		consoleBuffer[(((60 - strlen(line7)) / 2) + i) + screen_x * (py + 20)].Attributes = 7;
+	}
+}
+
+void leaderboardpage()
+{
+	const char* topic = "LEADERBOARD";
+	const char* l1 = "MODES";
+	const char* l2 = "CHALLENGE";
+	const char* l3 = "OBSTRUCTION";
+	const char* l4 = "BACK TO MAIN MENU";
+	int py = 8;
+	for (size_t i = 0; i < strlen(topic); i++)
+	{
+		consoleBuffer[(((60 - strlen(topic)) / 2) + i) + screen_x * (py + 0)].Char.AsciiChar = topic[i];
+		consoleBuffer[(((60 - strlen(topic)) / 2) + i) + screen_x * (py + 0)].Attributes = 10;
+	}
+	for (size_t i = 0; i < strlen(l1); i++)
+	{
+		consoleBuffer[(((60 - strlen(l1)) / 2) + i) + screen_x * (py + 2)].Char.AsciiChar = l1[i];
+		consoleBuffer[(((60 - strlen(l1)) / 2) + i) + screen_x * (py + 2)].Attributes = 10;
+	}
+	for (size_t i = 0; i < strlen(l2); i++)
+	{
+		consoleBuffer[(((60 - strlen(l2)) / 2) + i) + screen_x * (py + 4)].Char.AsciiChar = l2[i];
+		consoleBuffer[(((60 - strlen(l2)) / 2) + i) + screen_x * (py + 4)].Attributes = 7;
+	}
+	for (size_t i = 0; i < strlen(l3); i++)
+	{
+		consoleBuffer[(((60 - strlen(l3)) / 2) + i) + screen_x * (py + 6)].Char.AsciiChar = l3[i];
+		consoleBuffer[(((60 - strlen(l3)) / 2) + i) + screen_x * (py + 6)].Attributes = 7;
+	}
+	for (size_t i = 0; i < strlen(l4); i++)
+	{
+		consoleBuffer[(((60 - strlen(l4)) / 2) + i) + screen_x * (py + 8)].Char.AsciiChar = l4[i];
+		consoleBuffer[(((60 - strlen(l4)) / 2) + i) + screen_x * (py + 8)].Attributes = 7;
+	}
+
+}
+
+void boardpage()
+{
+	control_setting();
+	while (runround == 0)
+	{
+		gotoxy(0, 2);
+		clear_buffer();
+		fill_buffer_to_console();
+		if (challengeboard == true)
+		{
+			ScoreList score_list("ChallengeScore.txt");
+			score_list.loadFile();
+			score_list.printEntry();
+			score_list.saveFile();
+		}
+		else if (obsboard == true)
+		{
+			ScoreList score_list("ObstructionScore.txt");
+			score_list.loadFile();
+			score_list.printEntry();
+			score_list.saveFile();
+		}
+		runround++;
 	}
 }

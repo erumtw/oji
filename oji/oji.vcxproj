@@ -141,12 +141,13 @@
   <ItemGroup>
     <ClCompile Include="Score.cpp" />
     <ClCompile Include="ScoreList.cpp" />
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions.h" />
     <ClInclude Include="Score.h" />
     <ClInclude Include="ScoreList.h" />
+    <ClInclude Include="source.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
