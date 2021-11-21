@@ -5,6 +5,8 @@
 #include <windows.h>
 #include <time.h>
 #include <conio.h>
+#include <mutex>
+#include <thread>
 #include "ScoreList.h"
 #include "functions.h"
 #include "Textbaseconsole.h"
@@ -29,17 +31,19 @@ COORD wall[count];
 int wallcount;
 //Oji
 COORD oji[lenght];
-int Tlenght;
+int Tlength;
 enum directions { UP, DOWN, LEFT, RIGHT, STOP };
 directions dir;
-
+COORD item[20];
+enum itemlist { SLOWER, ADDHP, SHORTER};
+itemlist items;
+int scoreitem = 150;
+bool itemstat = false;
 
 bool GameOn = true, mainmenu, modemenu, normalMode, obstructMode, play, Gameover = false, howtoplay, leaderboard, obsboard, challengeboard;
 float speed;
 int HP, score;
 int mainpy = 15, modepy = 11, gameoverpy = 16, leaderpy = 12;
-enum itemlist { SLOWER, ADDHP, SHORTER, DELWALL };
-itemlist items;
 int runround = 0;
 string name;
 
@@ -62,7 +66,7 @@ void game_setup()
 	foodcount = 1;
 	wallcount = 0;
 	atefood = 3;
-	Tlenght = 1;
+	Tlength = 1;
 	speed = 80;
 	score = 0;
 	dir = STOP;
@@ -80,11 +84,13 @@ void normalModegame()
 	scorecount();
 	gameplaypage();
 	board();
-	eatcheck();
+	collisioncheck();
 	selfhits();
+	init_item();
 	fill_food();
 	fill_wall();
 	fill_oji();
+	fill_item();
 	fill_buffer_to_console(); // fill
 	Sleep(speed);
 }
@@ -173,6 +179,8 @@ void control_setting()
 					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
 						speed = 80;
+						scoreitem = 150;
+						score = 0;
 						if (modepy == 11)
 						{
 							//game_setup();
@@ -271,7 +279,7 @@ void fill_food()
 
 void fill_oji()
 {
-	for (int i = 0; i < Tlenght; i++)
+	for (int i = 0; i <= Tlength-1; i++)
 	{
 		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Char.AsciiChar = '@';
 		if (i == 0)
@@ -293,22 +301,66 @@ void fill_wall()
 	}
 }
 
+void fill_item()
+{
+	if (itemstat == true)
+	{
+		consoleBuffer[item[0].X + screen_x * item[0].Y].Char.AsciiChar = '?';
+		consoleBuffer[item[0].X + screen_x * item[0].Y].Attributes = 111;
+	}
+}
+
+void init_item()
+{
+	if (scoreitem == 0)
+	{
+		SHORT x = 2 + (rand() % (wx - 3));
+		SHORT y = 2 + (rand() % (hy - 4));
+		for (int j = 0; j < Tlength; j++)
+		{
+			for (int k = 0; k < foodcount; k++)
+			{
+				for(int l = 0; l < wallcount; l++)
+				if (x == oji[j].X && y == oji[j].Y && x == food[k].X && y == food[k].Y && x == wall[l].X && y == wall[l].Y)
+				{
+					bool found = true;
+					while (found == true)
+					{
+						x = 1 + (rand() % (wx - 2));
+						y = 1 + (rand() % (hy - 2));
+						if (x != oji[j].X && y != oji[j].Y && x != food[k].X && y != food[k].Y && x == wall[l].X && y == wall[l].Y)
+							found = false;
+					}
+				}
+			}
+		}
+		item[0] = { x, y };
+		scoreitem = 150;
+		itemstat = true;
+	}
+}
+
 void initfood()
 {
 	for (int i = 0; i < foodcount; i++)
 	{
 		SHORT x = 1 + (rand() % (wx - 2));
 		SHORT y = 1 + (rand() % (hy - 2));
-		for (int j = 0; j < Tlenght; j++)
+		for (int j = 0; j < Tlength; j++)
 		{
 			if (x == oji[j].X && y == oji[j].Y)
 			{
-				x = 1 + (rand() % (wx - 2));
-				y = 1 + (rand() % (hy - 2));
+				bool found = true;
+				while (found == true)
+				{
+					x = 1 + (rand() % (wx - 2));
+					y = 1 + (rand() % (hy - 2));
+					if ((x != oji[j].X && y != oji[j].Y))
+						found = false;
+				}
 			}
-			else
-				food[i] = { x, y };
 		}
+		food[i] = { x, y };
 	}
 }
 
@@ -320,19 +372,24 @@ void initwall()
 		{
 			SHORT x = 2 + (rand() % (wx - 3));
 			SHORT y = 2 + (rand() % (hy - 4));
-			for (int j = 0; j < Tlenght; j++)
+			for (int j = 0; j < Tlength; j++)
 			{
 				for (int k = 0; k < foodcount; k++)
 				{
 					if (x == oji[j].X && y == oji[j].Y && x == food[k].X && y == food[k].Y && (x - oji[0].X < 4) & (y - oji[0].Y < 4))
 					{
-						x = 1 + (rand() % (wx - 2));
-						y = 1 + (rand() % (hy - 2));
+						bool found = true;
+						while (found == true)
+						{
+							x = 1 + (rand() % (wx - 2));
+							y = 1 + (rand() % (hy - 2));
+							if (x != oji[j].X && y != oji[j].Y && x != food[k].X && y != food[k].Y && (x - oji[0].X > 4) & (y - oji[0].Y > 4))
+								found = false;
+						}
 					}
-					else
-						wall[i] = { x, y };
 				}
 			}
+			wall[i] = { x, y };
 		}
 	}
 }
@@ -361,6 +418,8 @@ void oji_move()
 		{
 			HP--;
 			if (HP == 0) {
+				thread g(Beep, 1175, 200);
+				g.detach();
 				Sleep(100);
 				savescore();
 				Gameover = true;
@@ -385,6 +444,8 @@ void oji_move()
 		{
 			HP--;
 			if (HP == 0) {
+				thread g(Beep, 1175, 200);
+				g.detach();
 				Sleep(100);
 				savescore();
 				Gameover = true;
@@ -409,6 +470,8 @@ void oji_move()
 		{
 			HP--;
 			if (HP == 0) {
+				thread g(Beep, 1175, 200);
+				g.detach();
 				Sleep(100);
 				savescore();
 				Gameover = true;
@@ -433,6 +496,8 @@ void oji_move()
 		{
 			HP--;
 			if (HP == 0) {
+				thread g(Beep, 1175, 200);
+				g.detach();
 				Sleep(100);
 				savescore();
 				Gameover = true;
@@ -460,19 +525,21 @@ void board()
 		}
 	}
 }
-
-void eatcheck()
+//mutex mtx;
+void collisioncheck()
 {
 	for (size_t i = 0; i < foodcount; i++)
 	{
 		if (oji[0].X == food[i].X && oji[0].Y == food[i].Y)
 		{
-			Tlenght++;
+			thread g(Beep, 636, 100);
+			g.detach();
+			Tlength++;
 			initfood();
 			score += 10;
+			scoreitem -= 10;
 			if (speed != 50)
 				speed -= 0.5;
-
 			if (wallstat == true)
 			{
 				atefood--;
@@ -493,6 +560,8 @@ void eatcheck()
 			HP--;
 			if (HP == 0)
 			{
+				thread w(Beep, 1175, 200);
+				w.detach();
 				savescore();
 				play = false;
 				normalMode = false;
@@ -501,10 +570,25 @@ void eatcheck()
 			}
 		}
 	}
+
+	if (oji[0].X == item[0].X && oji[0].Y == item[0].Y)
+	{
+		thread a(Beep, 500, 100);
+		a.detach();
+		itemstat = false;
+		int peritem[10] = {1,1,2,1,3,1,2,3,1,1}; // 1 slow  2 hp 3 shorter
+		int r = 1 + rand() % 10;
+		if (peritem[r] == 1 && speed < 80)
+			speed += 1;
+		else if (peritem[r] == 2 && HP < 5)
+			HP++;
+		else if (peritem[r] == 3)
+			Tlength--;
+	}
 }
 void selfhits()
 {
-	for (int i = 1; i <= Tlenght; i++)
+	for (int i = 1; i <= Tlength; i++)
 	{
 		if (oji[0].X == oji[i].X && oji[0].Y == oji[i].Y)
 		{
@@ -523,16 +607,16 @@ void selfhits()
 
 }
 
-int fposX, fposY, sposX, sposY;
 void addtail()
 {
+	int fposX, fposY, sposX, sposY ;
 	if (dir != STOP)
 	{
 		fposX = oji[1].X;
 		fposY = oji[1].Y;
 		oji[1].X = oji[0].X;
 		oji[1].Y = oji[0].Y;
-		for (int i = 2; i < Tlenght; i++)
+		for (int i = 2; i <= Tlength-1; i++)
 		{
 			sposX = oji[i].X;
 			sposY = oji[i].Y;
@@ -561,6 +645,7 @@ void savescore()
 		score_list.saveFile();
 	}
 }
+
 
 void myname()
 {
@@ -698,6 +783,10 @@ void scorecount()
 	string h = to_string(HP);
 	const char* hchar = h.c_str();
 
+	const char* taillen = "TAIL LENGTH = ";
+	string t = to_string(Tlength);
+	const char* tchar = t.c_str();
+
 	for (size_t i = 0; i < strlen(scoretext); i++)
 	{
 		consoleBuffer[(px + i) + screen_x * py].Char.AsciiChar = scoretext[i];
@@ -718,6 +807,17 @@ void scorecount()
 	{
 		consoleBuffer[(44 + i) + screen_x * (py + 1)].Char.AsciiChar = hchar[i];
 		consoleBuffer[(44 + i) + screen_x * (py + 1)].Attributes = 4;
+	}
+
+	for (size_t i = 0; i < strlen(taillen); i++)
+	{
+		consoleBuffer[(px + i) + screen_x * (py + 2)].Char.AsciiChar = taillen[i];
+		consoleBuffer[(px + i) + screen_x * (py + 2)].Attributes = 15;
+	}
+	for (size_t i = 0; i < strlen(tchar); i++)
+	{
+		consoleBuffer[(54 + i) + screen_x * (py + 2)].Char.AsciiChar = tchar[i];
+		consoleBuffer[(54 + i) + screen_x * (py + 2)].Attributes = 4;
 	}
 }
 
@@ -974,7 +1074,7 @@ void boardpage()
 		clear_buffer();
 		fill_buffer_to_console();
 		gotoxy(0, 3);
-		setcolor(6 ,0);
+		setcolor(6, 0);
 		cout << " ========================LEADERBOARD========================";
 		gotoxy(0, 5);
 		setcolor(10, 0);

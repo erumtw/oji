@@ -167,17 +167,6 @@ void ScoreList::printEntry(unsigned long max_entry) {
         if(entry.getName().size() > longest_name_size) longest_name_size = entry.getName().size();
         if(std::to_string(entry.getScore()).size() > longest_score_size) longest_score_size = std::to_string(entry.getScore()).size();
     }
-    //apearacne here
-
-    /*
-    for (unsigned long i = 0; i < std::max(4 + longest_name_size + 5 + longest_score_size - (int)this->file_name.size(), 4 + longest_name_size + 5 + longest_score_size); i++) {
-        if(i == 3) std::cout << " " << this->file_name << " ";
-        if(i == 0 || i == std::max(4 + longest_name_size + 5 + longest_score_size - (int)this->file_name.size(), 4 + longest_name_size + 5 + longest_score_size) - 1) std::cout << "*";
-        else std::cout << "=";
-    }
-    std::cout << std::endl;
-    */
-  
 
     for(unsigned long entry = 0; entry < this->score_list.size(); entry++) {
 
@@ -196,14 +185,6 @@ void ScoreList::printEntry(unsigned long max_entry) {
         std::cout << std::endl;
     }
 
-    /*
-    for (unsigned long i = 0; i < std::max(4 + longest_name_size + 5 + longest_score_size - (int)this->file_name.size(), 4 + longest_name_size + 5 + longest_score_size); i++) {
-        if(i == 3) for(unsigned long i = 0; i < this->file_name.size() + 2; i++) std::cout << "=";
-        if(i == 0 || i == std::max(4 + longest_name_size + 5 + longest_score_size - (int)this->file_name.size(), 4 + longest_name_size + 5 + longest_score_size) - 1) std::cout << "*";
-        else std::cout << "=";
-    }
-    std::cout << std::endl;
-    */
 }
 
 /**
