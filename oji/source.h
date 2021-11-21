@@ -322,6 +322,13 @@ void gotoxy(int x, int y)
 	COORD c = { x, y };
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
 }
+
+void setcolor(int fg, int bg)
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, bg * 16 + fg);
+}
+
 void fill_food()
 {
 	for (int i = 0; i < foodcount; i++)
@@ -1033,9 +1040,13 @@ void boardpage()
 	control_setting();
 	while (runround == 0)
 	{
-		gotoxy(0, 2);
 		clear_buffer();
 		fill_buffer_to_console();
+		gotoxy(0, 2);
+		setcolor(6 ,0);
+		cout << "=========================LEADERBOARD========================";
+		gotoxy(0, 4);
+		setcolor(10, 0);
 		if (challengeboard == true)
 		{
 			ScoreList score_list("ChallengeScore.txt");
@@ -1050,6 +1061,10 @@ void boardpage()
 			score_list.printEntry();
 			score_list.saveFile();
 		}
+		setcolor(6, 0);
+		cout << endl << "============================================================";
+		gotoxy(29, 24);
+		cout << "PRESS ENTER : BACK TO MAIN MENU";
 		runround++;
 	}
 }

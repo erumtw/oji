@@ -177,6 +177,7 @@ void ScoreList::printEntry(unsigned long max_entry) {
     }
     std::cout << std::endl;
     */
+  
 
     for(unsigned long entry = 0; entry < this->score_list.size(); entry++) {
 
