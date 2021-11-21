@@ -147,7 +147,8 @@
     <ClInclude Include="functions.h" />
     <ClInclude Include="Score.h" />
     <ClInclude Include="ScoreList.h" />
-    <ClInclude Include="source.h" />
+    <ClInclude Include="Program.h" />
+    <ClInclude Include="Textbaseconsole.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

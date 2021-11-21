@@ -35,7 +35,10 @@
     <ClInclude Include="functions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="source.h">
+    <ClInclude Include="Program.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Textbaseconsole.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
