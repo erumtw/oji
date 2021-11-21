@@ -279,14 +279,14 @@ void fill_food()
 
 void fill_oji()
 {
-	for (int i = 0; i <= Tlength-1; i++)
-	{
+		consoleBuffer[oji[0].X + screen_x * oji[0].Y].Char.AsciiChar = '@';
+		consoleBuffer[oji[0].X + screen_x * oji[0].Y].Attributes = 15;
+		for(int i = 1; i < Tlength-1; i++)
+		{
 		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Char.AsciiChar = '@';
-		if (i == 0)
-			consoleBuffer[oji[i].X + screen_x * oji[i].Y].Attributes = 15;
-		else
-			consoleBuffer[oji[i].X + screen_x * oji[i].Y].Attributes = 7;
-	}
+		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Attributes = 7;
+		}
+
 }
 
 void fill_wall()
@@ -534,7 +534,12 @@ void collisioncheck()
 		{
 			thread g(Beep, 636, 100);
 			g.detach();
-			Tlength++;
+			if (Tlength == 1) {
+				Tlength += 2;
+			}
+			else {
+				Tlength++;
+			}
 			initfood();
 			score += 10;
 			scoreitem -= 10;
@@ -616,7 +621,7 @@ void addtail()
 		fposY = oji[1].Y;
 		oji[1].X = oji[0].X;
 		oji[1].Y = oji[0].Y;
-		for (int i = 2; i <= Tlength-1; i++)
+		for (int i = 2; i < Tlength; i++)
 		{
 			sposX = oji[i].X;
 			sposY = oji[i].Y;
@@ -783,9 +788,6 @@ void scorecount()
 	string h = to_string(HP);
 	const char* hchar = h.c_str();
 
-	const char* taillen = "TAIL LENGTH = ";
-	string t = to_string(Tlength);
-	const char* tchar = t.c_str();
 
 	for (size_t i = 0; i < strlen(scoretext); i++)
 	{
@@ -800,27 +802,15 @@ void scorecount()
 
 	for (size_t i = 0; i < strlen(health); i++)
 	{
-		consoleBuffer[(px + i) + screen_x * (py + 1)].Char.AsciiChar = health[i];
-		consoleBuffer[(px + i) + screen_x * (py + 1)].Attributes = 15;
+		consoleBuffer[(px + i) + screen_x * (py + 2)].Char.AsciiChar = health[i];
+		consoleBuffer[(px + i) + screen_x * (py + 2)].Attributes = 15;
 	}
 	for (size_t i = 0; i < strlen(hchar); i++)
 	{
-		consoleBuffer[(44 + i) + screen_x * (py + 1)].Char.AsciiChar = hchar[i];
-		consoleBuffer[(44 + i) + screen_x * (py + 1)].Attributes = 4;
-	}
-
-	for (size_t i = 0; i < strlen(taillen); i++)
-	{
-		consoleBuffer[(px + i) + screen_x * (py + 2)].Char.AsciiChar = taillen[i];
-		consoleBuffer[(px + i) + screen_x * (py + 2)].Attributes = 15;
-	}
-	for (size_t i = 0; i < strlen(tchar); i++)
-	{
-		consoleBuffer[(54 + i) + screen_x * (py + 2)].Char.AsciiChar = tchar[i];
-		consoleBuffer[(54 + i) + screen_x * (py + 2)].Attributes = 4;
+		consoleBuffer[(44 + i) + screen_x * (py + 2)].Char.AsciiChar = hchar[i];
+		consoleBuffer[(44 + i) + screen_x * (py + 2)].Attributes = 4;
 	}
 }
-
 
 void menuascii()
 {
