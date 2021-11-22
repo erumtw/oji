@@ -171,7 +171,7 @@ void ScoreList::printEntry(unsigned long max_entry) {
     for(unsigned long entry = 0; entry < this->score_list.size(); entry++) {
 
         if(entry >= max_entry && max_entry != 0) break;
-        std::cout << "\t\t   ";
+        std::cout << "\t\t    ";
         //std::cout << "-";
         std::cout << " ";
 

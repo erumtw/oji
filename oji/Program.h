@@ -35,8 +35,7 @@ int Tlength;
 enum directions { UP, DOWN, LEFT, RIGHT, STOP };
 directions dir;
 COORD item[20];
-enum itemlist { SLOWER, ADDHP, SHORTER};
-itemlist items;
+
 int scoreitem = 150;
 bool itemstat = false;
 
@@ -181,6 +180,8 @@ void control_setting()
 						speed = 80;
 						scoreitem = 150;
 						score = 0;
+						atefood = 3;
+						HP = 2;
 						if (modepy == 11)
 						{
 							//game_setup();
@@ -720,7 +721,10 @@ void gameplaypage()
 		for (size_t i = 0; i < strlen(l3); i++)
 		{
 			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Char.AsciiChar = l3[i];
-			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 7;
+			if (i == 0)
+				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 111;
+			else
+				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 7;
 		}
 	}
 	else //obstruction mode
@@ -771,7 +775,10 @@ void gameplaypage()
 		for (size_t i = 0; i < strlen(l3); i++)
 		{
 			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Char.AsciiChar = l3[i];
-			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 7;
+			if (i == 0)
+				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 111;
+			else
+				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 7;
 		}
 	}
 }
@@ -1066,20 +1073,26 @@ void boardpage()
 		gotoxy(0, 3);
 		setcolor(6, 0);
 		cout << " ========================LEADERBOARD========================";
-		gotoxy(0, 5);
-		setcolor(10, 0);
 		if (challengeboard == true)
 		{
+			gotoxy(22, 4);
+			cout << "CHALLENGE'S MODE";
+			gotoxy(0, 6);
+			setcolor(10, 0);
 			ScoreList score_list("ChallengeScore.txt");
 			score_list.loadFile();
-			score_list.printEntry();
+			score_list.printEntry(5);
 			score_list.saveFile();
 		}
 		else if (obsboard == true)
 		{
+			gotoxy(22, 4);
+			cout << "OBSTRUCTION'S MODE";
+			gotoxy(0, 6);
+			setcolor(10, 0);
 			ScoreList score_list("ObstructionScore.txt");
 			score_list.loadFile();
-			score_list.printEntry();
+			score_list.printEntry(5);
 			score_list.saveFile();
 		}
 		setcolor(6, 0);
