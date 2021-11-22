@@ -58,6 +58,7 @@ void game_setup()
 	normalMode = false;
 	obstructMode = false;
 	wallstat = false;
+	itemstat = false;
 	leaderboard = false;
 	obsboard = false;
 	challengeboard = false;
@@ -141,6 +142,16 @@ void control_setting()
 					}
 					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
+						speed = 80;
+						scoreitem = 150;
+						score = 0;
+						atefood = 3;
+						HP = 2;
+						wallcount = 0;
+						wallstat = false;
+						itemstat = false;
+						Tlength = 1;
+						dir = STOP;
 						if (mainpy == 15)
 						{
 							game_setup();
@@ -177,11 +188,6 @@ void control_setting()
 					}
 					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
-						speed = 80;
-						scoreitem = 150;
-						score = 0;
-						atefood = 3;
-						HP = 2;
 						if (modepy == 11)
 						{
 							//game_setup();
@@ -585,7 +591,7 @@ void collisioncheck()
 		int peritem[10] = {1,1,2,1,3,1,2,3,1,1}; // 1 slow  2 hp 3 shorter
 		int r = 1 + rand() % 10;
 		if (peritem[r] == 1 && speed < 80)
-			speed += 1;
+			speed += 0.5;
 		else if (peritem[r] == 2 && HP < 5)
 			HP++;
 		else if (peritem[r] == 3)
