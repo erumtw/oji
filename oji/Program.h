@@ -36,7 +36,7 @@ enum directions { UP, DOWN, LEFT, RIGHT, STOP };
 directions dir;
 COORD item[20];
 
-int scoreitem = 150;
+int scoreitem = 120;
 bool itemstat = false;
 
 bool GameOn = true, mainmenu, modemenu, normalMode, obstructMode, play, Gameover = false, howtoplay, leaderboard, obsboard, challengeboard;
@@ -143,7 +143,7 @@ void control_setting()
 					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
 						speed = 80;
-						scoreitem = 150;
+						scoreitem = 120;
 						score = 0;
 						atefood = 3;
 						HP = 2;
@@ -248,7 +248,7 @@ void control_setting()
 				{
 					if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
-						if (obsboard == true) { obsboard = false; }	
+						if (obsboard == true) { obsboard = false; }
 						else if (challengeboard == true) { challengeboard = false; }
 						leaderboard = true;
 					}
@@ -286,13 +286,13 @@ void fill_food()
 
 void fill_oji()
 {
-		consoleBuffer[oji[0].X + screen_x * oji[0].Y].Char.AsciiChar = '@';
-		consoleBuffer[oji[0].X + screen_x * oji[0].Y].Attributes = 15;
-		for(int i = 1; i < Tlength-1; i++)
-		{
+	consoleBuffer[oji[0].X + screen_x * oji[0].Y].Char.AsciiChar = '@';
+	consoleBuffer[oji[0].X + screen_x * oji[0].Y].Attributes = 15;
+	for (int i = 1; i < Tlength - 1; i++)
+	{
 		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Char.AsciiChar = '@';
 		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Attributes = 7;
-		}
+	}
 
 }
 
@@ -327,22 +327,22 @@ void init_item()
 		{
 			for (int k = 0; k < foodcount; k++)
 			{
-				for(int l = 0; l < wallcount; l++)
-				if (x == oji[j].X && y == oji[j].Y && x == food[k].X && y == food[k].Y && x == wall[l].X && y == wall[l].Y)
-				{
-					bool found = true;
-					while (found == true)
+				for (int l = 0; l < wallcount; l++)
+					if (x == oji[j].X && y == oji[j].Y && x == food[k].X && y == food[k].Y && x == wall[l].X && y == wall[l].Y)
 					{
-						x = 1 + (rand() % (wx - 2));
-						y = 1 + (rand() % (hy - 2));
-						if (x != oji[j].X && y != oji[j].Y && x != food[k].X && y != food[k].Y && x == wall[l].X && y == wall[l].Y)
-							found = false;
+						bool found = true;
+						while (found == true)
+						{
+							x = 1 + (rand() % (wx - 2));
+							y = 1 + (rand() % (hy - 2));
+							if (x != oji[j].X && y != oji[j].Y && x != food[k].X && y != food[k].Y && x == wall[l].X && y == wall[l].Y)
+								found = false;
+						}
 					}
-				}
 			}
 		}
 		item[0] = { x, y };
-		scoreitem = 150;
+		scoreitem = 120;
 		itemstat = true;
 	}
 }
@@ -588,14 +588,14 @@ void collisioncheck()
 		thread a(Beep, 500, 100);
 		a.detach();
 		itemstat = false;
-		int peritem[10] = {1,1,2,1,3,1,2,3,1,1}; // 1 slow  2 hp 3 shorter
+		int peritem[10] = { 1,1,2,1,3,1,2,3,2,3 }; // 1 slow  2 hp 3 shorter
 		int r = 1 + rand() % 10;
 		if (peritem[r] == 1 && speed < 80)
 			speed += 0.5;
 		else if (peritem[r] == 2 && HP < 5)
 			HP++;
-		else if (peritem[r] == 3)
-			Tlength--;
+		else if (peritem[r] == 3 && Tlength > 2)
+			Tlength -= 2;
 	}
 }
 void selfhits()
@@ -616,12 +616,11 @@ void selfhits()
 			}
 		}
 	}
-
 }
 
 void addtail()
 {
-	int fposX, fposY, sposX, sposY ;
+	int fposX, fposY, sposX, sposY;
 	if (dir != STOP)
 	{
 		fposX = oji[1].X;
@@ -681,15 +680,17 @@ void gameplaypage()
 	const char* l1 = "* = 10 point";
 	const char* l2 = "# = Obstruction / Wall";
 	const char* l3 = "? = Random item";
+	const char* titlename = "USER NAME : ";
+	const char* username = name.c_str();
 
+	int py = 2;
+	for (size_t i = 0; i < strlen(a1); i++)
+	{
+		consoleBuffer[30 + (((30 - strlen(a1)) / 2) + i) + screen_x * (py + 0)].Char.AsciiChar = a1[i];
+		consoleBuffer[30 + (((30 - strlen(a1)) / 2) + i) + screen_x * (py + 0)].Attributes = 10;
+	}
 	if (wallstat == false) // challenge mode
 	{
-		int py = 2;
-		for (size_t i = 0; i < strlen(a1); i++)
-		{
-			consoleBuffer[30 + (((30 - strlen(a1)) / 2) + i) + screen_x * (py + 0)].Char.AsciiChar = a1[i];
-			consoleBuffer[30 + (((30 - strlen(a1)) / 2) + i) + screen_x * (py + 0)].Attributes = 10;
-		}
 
 		for (size_t i = 0; i < strlen(mode11); i++)
 		{
@@ -705,43 +706,9 @@ void gameplaypage()
 			consoleBuffer[30 + (((30 - strlen(mode12)) / 2) + i) + screen_x * (py + 4)].Char.AsciiChar = mode12[i];
 			consoleBuffer[30 + (((30 - strlen(mode12)) / 2) + i) + screen_x * (py + 4)].Attributes = 7;
 		}
-
-		for (size_t i = 0; i < strlen(l1); i++)
-		{
-			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Char.AsciiChar = l1[i];
-			if (i == 0)
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Attributes = 4;
-			else
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Attributes = 7;
-		}
-
-		for (size_t i = 0; i < strlen(l2); i++)
-		{
-			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Char.AsciiChar = l2[i];
-			if (i == 0)
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Attributes = 10;
-			else
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Attributes = 7;
-		}
-
-		for (size_t i = 0; i < strlen(l3); i++)
-		{
-			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Char.AsciiChar = l3[i];
-			if (i == 0)
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 111;
-			else
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 7;
-		}
 	}
 	else //obstruction mode
 	{
-		int py = 2;
-		for (size_t i = 0; i < strlen(a1); i++)
-		{
-			consoleBuffer[30 + (((30 - strlen(a1)) / 2) + i) + screen_x * (py + 0)].Char.AsciiChar = a1[i];
-			consoleBuffer[30 + (((30 - strlen(a1)) / 2) + i) + screen_x * (py + 0)].Attributes = 10;
-		}
-
 		for (size_t i = 0; i < strlen(mode21); i++)
 		{
 			consoleBuffer[30 + (((30 - strlen(mode21)) / 2) + i) + screen_x * (py + 2)].Char.AsciiChar = mode21[i];
@@ -759,33 +726,44 @@ void gameplaypage()
 			else
 				consoleBuffer[30 + (((30 - strlen(mode22)) / 2) + i) + screen_x * (py + 4)].Attributes = 7;
 		}
+	}
+	for (size_t i = 0; i < strlen(l1); i++)
+	{
+		consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Char.AsciiChar = l1[i];
+		if (i == 0)
+			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Attributes = 4;
+		else
+			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Attributes = 7;
+	}
 
-		for (size_t i = 0; i < strlen(l1); i++)
-		{
-			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Char.AsciiChar = l1[i];
-			if (i == 0)
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Attributes = 4;
-			else
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 15].Attributes = 7;
-		}
+	for (size_t i = 0; i < strlen(l2); i++)
+	{
+		consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Char.AsciiChar = l2[i];
+		if (i == 0)
+			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Attributes = 10;
+		else
+			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Attributes = 7;
+	}
 
-		for (size_t i = 0; i < strlen(l2); i++)
-		{
-			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Char.AsciiChar = l2[i];
-			if (i == 0)
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Attributes = 10;
-			else
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 16].Attributes = 7;
-		}
+	for (size_t i = 0; i < strlen(l3); i++)
+	{
+		consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Char.AsciiChar = l3[i];
+		if (i == 0)
+			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 111;
+		else
+			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 7;
+	}
 
-		for (size_t i = 0; i < strlen(l3); i++)
-		{
-			consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Char.AsciiChar = l3[i];
-			if (i == 0)
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 111;
-			else
-				consoleBuffer[30 + (((30 - strlen(l2)) / 2) + i) + screen_x * 17].Attributes = 7;
-		}
+	for (size_t i = 0; i < strlen(titlename); i++)
+	{
+		consoleBuffer[30+(((30 - (strlen(titlename) + strlen(username))) / 2) + i) + screen_x * 22].Char.AsciiChar = titlename[i];
+		consoleBuffer[30+(((30 - (strlen(titlename) + strlen(username))) / 2) + i) + screen_x * 22].Attributes = 10;
+	}
+
+	for (size_t i = 0; i < strlen(username); i++)
+	{
+		consoleBuffer[30+strlen(titlename) + (((30 - (strlen(titlename) + strlen(username))) / 2) + i) + screen_x * 22].Char.AsciiChar = username[i];
+		consoleBuffer[30+strlen(titlename) + (((30 - (strlen(titlename) + strlen(username))) / 2) + i) + screen_x * 22].Attributes = 7;
 	}
 }
 
@@ -800,6 +778,10 @@ void scorecount()
 	const char* health = "HP = ";
 	string h = to_string(HP);
 	const char* hchar = h.c_str();
+
+	const char* tails = "TAIL LENGTH = ";
+	string t = to_string(Tlength-2);
+	const char* tchar = t.c_str();
 
 
 	for (size_t i = 0; i < strlen(scoretext); i++)
@@ -822,6 +804,25 @@ void scorecount()
 	{
 		consoleBuffer[(44 + i) + screen_x * (py + 2)].Char.AsciiChar = hchar[i];
 		consoleBuffer[(44 + i) + screen_x * (py + 2)].Attributes = 4;
+	}
+
+	for (size_t i = 0; i < strlen(tails); i++)
+	{
+		consoleBuffer[(px + i) + screen_x * (py + 4)].Char.AsciiChar = tails[i];
+		consoleBuffer[(px + i) + screen_x * (py + 4)].Attributes = 15;
+	}
+	if (Tlength <= 2)
+	{
+		consoleBuffer[53 + screen_x * (py + 4)].Char.AsciiChar = '0';
+		consoleBuffer[53 + screen_x * (py + 4)].Attributes = 4;
+	}
+	else
+	{
+		for (size_t i = 0; i < strlen(tchar); i++)
+		{
+			consoleBuffer[(53 + i) + screen_x * (py + 4)].Char.AsciiChar = tchar[i];
+			consoleBuffer[(53 + i) + screen_x * (py + 4)].Attributes = 4;
+		}
 	}
 }
 
