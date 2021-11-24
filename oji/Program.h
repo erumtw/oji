@@ -36,7 +36,7 @@ enum directions { UP, DOWN, LEFT, RIGHT, STOP };
 directions dir;
 COORD item[20];
 
-int scoreitem = 120;
+int scoreitem = 90;
 bool itemstat = false;
 
 bool GameOn = true, mainmenu, modemenu, normalMode, obstructMode, play, Gameover = false, howtoplay, leaderboard, obsboard, challengeboard;
@@ -143,7 +143,7 @@ void control_setting()
 					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
 						speed = 80;
-						scoreitem = 120;
+						scoreitem = 90;
 						score = 0;
 						atefood = 3;
 						HP = 2;
@@ -287,11 +287,11 @@ void fill_food()
 void fill_oji()
 {
 	consoleBuffer[oji[0].X + screen_x * oji[0].Y].Char.AsciiChar = '@';
-	consoleBuffer[oji[0].X + screen_x * oji[0].Y].Attributes = 15;
+	consoleBuffer[oji[0].X + screen_x * oji[0].Y].Attributes = 10;
 	for (int i = 1; i < Tlength - 1; i++)
 	{
 		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Char.AsciiChar = '@';
-		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Attributes = 7;
+		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Attributes = 2;
 	}
 
 }
@@ -342,7 +342,7 @@ void init_item()
 			}
 		}
 		item[0] = { x, y };
-		scoreitem = 120;
+		scoreitem = 90;
 		itemstat = true;
 	}
 }
@@ -355,15 +355,18 @@ void initfood()
 		SHORT y = 1 + (rand() % (hy - 2));
 		for (int j = 0; j < Tlength; j++)
 		{
-			if (x == oji[j].X && y == oji[j].Y)
+			for (size_t i = 0; i < wallcount; i++)
 			{
-				bool found = true;
-				while (found == true)
+				if (x == oji[j].X && y == oji[j].Y && x == wall[i].X && y == wall[i].Y)
 				{
-					x = 1 + (rand() % (wx - 2));
-					y = 1 + (rand() % (hy - 2));
-					if ((x != oji[j].X && y != oji[j].Y))
-						found = false;
+					bool found = true;
+					while (found == true)
+					{
+						x = 1 + (rand() % (wx - 2));
+						y = 1 + (rand() % (hy - 2));
+						if (x != oji[j].X && y != oji[j].Y && x != wall[i].X && y != wall[i].Y)
+							found = false;
+					}
 				}
 			}
 		}
@@ -594,10 +597,11 @@ void collisioncheck()
 			speed += 0.5;
 		else if (peritem[r] == 2 && HP < 5)
 			HP++;
-		else if (peritem[r] == 3 && Tlength > 2)
+		else if (peritem[r] == 3 && Tlength > 3)
 			Tlength -= 2;
 	}
 }
+
 void selfhits()
 {
 	for (int i = 1; i <= Tlength; i++)
