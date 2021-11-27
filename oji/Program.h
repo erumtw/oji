@@ -28,7 +28,7 @@ int foodcount;
 //wall
 bool wallstat;
 COORD wall[count];
-int wallcount = 0;
+int wallcount;
 //Oji
 COORD oji[lenght];
 int Tlength;
@@ -36,7 +36,7 @@ enum directions { UP, DOWN, LEFT, RIGHT, STOP };
 directions dir;
 COORD item[20];
 
-int scoreitem = 90;
+int scoreitem;
 bool itemstat = false;
 
 bool GameOn = true, mainmenu, modemenu, normalMode, obstructMode, play, Gameover = false, howtoplay, leaderboard, obsboard, challengeboard;
@@ -63,6 +63,7 @@ void game_setup()
 	wallstat = false;
 	itemstat = false;
 	HP = 2;
+	scoreitem = 90;
 	foodcount = 1;
 	wallcount = 0;
 	atefood = 3;
@@ -144,7 +145,7 @@ void control_setting()
 					{
 						if (mainpy == 15)
 						{
-							game_setup();
+							//game_setup();
 							mainmenu = false;
 							modemenu = true;
 						}
@@ -323,12 +324,12 @@ void init_item()
 					if ((x == oji[j].X && y == oji[j].Y) || (x == food[k].X && y == food[k].Y) || (x == wall[l].X && y == wall[l].Y))
 					{
 						bool found = true;
-						while (found == true)
+						for (int i = 0; i <= 100; i++)
 						{
 							x = 1 + (rand() % (wx - 2));
 							y = 1 + (rand() % (hy - 2));
 							if ((x != oji[j].X && y != oji[j].Y) && (x != food[k].X && y != food[k].Y) && (x == wall[l].X && y == wall[l].Y))
-								found = false;
+								i = 100;
 						}
 					}
 			}
@@ -345,19 +346,19 @@ void initfood()
 	{
 		SHORT x = 1 + (rand() % (wx - 2));
 		SHORT y = 1 + (rand() % (hy - 2));
-		for (int j = 0; j <= Tlength; j++)
+		for (int j = 0; j < Tlength; j++)
 		{
-			for (size_t k = 0; k <= wallcount; k++)
+			for (size_t k = 0; k < wallcount; k++)
 			{
 				if ((x == oji[j].X && y == oji[j].Y) || (x == wall[k].X && y == wall[k].Y))
 				{
 					bool found = true;
-					while (found == true)
+					for (int i = 0; i <= 100; i++)
 					{
 						x = 1 + (rand() % (wx - 2));
 						y = 1 + (rand() % (hy - 2));
 						if ((x != oji[j].X && y != oji[j].Y) && (x != wall[k].X && y != wall[k].Y))
-							found = false;
+							i = 100;
 					}
 				}
 			}
@@ -381,13 +382,13 @@ void initwall()
 					if ((x == oji[j].X && y == oji[j].Y) || (x == food[k].X && y == food[k].Y) || ((x - oji[0].X < 4) && (y - oji[0].Y < 4)))
 					{
 						bool found = true;
-						while (found == true)
+						for (int i = 0; i <= 100; i++)
 						{
 							x = 1 + (rand() % (wx - 2));
 							y = 1 + (rand() % (hy - 2));
 							if ((x != oji[j].X && y != oji[j].Y) && (x != food[k].X && y != food[k].Y) && ((x - oji[0].X > 4) && (y - oji[0].Y > 4)))
 							{
-								found = false;
+								i = 100;
 							}
 						}
 					}
@@ -1115,15 +1116,13 @@ void boardpage()
 void resetgame()
 {
 	wallstat = false;
+	wallcount = 0;
 	itemstat = false;
 	HP = 2;
 	foodcount = 1;
-	wallcount = 0;
 	atefood = 3;
 	Tlength = 1;
 	speed = 80;
+	scoreitem = 90;
 	dir = STOP;
-	init_oji();
-	initfood();
-	initwall();
 }
