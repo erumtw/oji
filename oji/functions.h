@@ -32,6 +32,8 @@ void leaderboardpage();
 void savescore();
 void boardpage();
 void deathsound();
+void resetgame();
+
 /*
 thread q(Beep, 1568, 200);
 q.detach();

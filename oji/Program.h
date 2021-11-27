@@ -28,7 +28,7 @@ int foodcount;
 //wall
 bool wallstat;
 COORD wall[count];
-int wallcount;
+int wallcount = 0;
 //Oji
 COORD oji[lenght];
 int Tlength;
@@ -57,11 +57,11 @@ void game_setup()
 	modemenu = false;
 	normalMode = false;
 	obstructMode = false;
-	wallstat = false;
-	itemstat = false;
 	leaderboard = false;
 	obsboard = false;
 	challengeboard = false;
+	wallstat = false;
+	itemstat = false;
 	HP = 2;
 	foodcount = 1;
 	wallcount = 0;
@@ -78,14 +78,14 @@ void game_setup()
 void normalModegame()
 {
 	control_setting(); // w a s d f
+	clear_buffer(); // clear
 	addtail();
 	oji_move();
-	clear_buffer(); // clear
+	collisioncheck();
+	selfhits();
 	scorecount();
 	gameplaypage();
 	board();
-	collisioncheck();
-	selfhits();
 	init_item();
 	fill_food();
 	fill_wall();
@@ -142,16 +142,6 @@ void control_setting()
 					}
 					else if (eventBuffer[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
 					{
-						speed = 80;
-						scoreitem = 90;
-						score = 0;
-						atefood = 3;
-						HP = 2;
-						wallcount = 0;
-						wallstat = false;
-						itemstat = false;
-						Tlength = 1;
-						dir = STOP;
 						if (mainpy == 15)
 						{
 							game_setup();
@@ -191,6 +181,7 @@ void control_setting()
 						if (modepy == 11)
 						{
 							//game_setup();
+							wallstat = false;
 							modemenu = false;
 							play = true;
 							normalMode = true;
@@ -259,6 +250,8 @@ void control_setting()
 					{
 						mainmenu = true;
 						Gameover = false;
+						score = 0;
+						resetgame();
 					}
 				}
 				else if (howtoplay == true)
@@ -293,12 +286,11 @@ void fill_oji()
 		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Char.AsciiChar = '@';
 		consoleBuffer[oji[i].X + screen_x * oji[i].Y].Attributes = 2;
 	}
-
 }
 
 void fill_wall()
 {
-	if (wallstat == true)
+	if (wallstat == true && wallcount > 0)
 	{
 		for (int i = 0; i < wallcount; i++)
 		{
@@ -323,19 +315,19 @@ void init_item()
 	{
 		SHORT x = 2 + (rand() % (wx - 3));
 		SHORT y = 2 + (rand() % (hy - 4));
-		for (int j = 0; j < Tlength; j++)
+		for (int j = 0; j <= Tlength; j++)
 		{
 			for (int k = 0; k < foodcount; k++)
 			{
 				for (int l = 0; l < wallcount; l++)
-					if (x == oji[j].X && y == oji[j].Y && x == food[k].X && y == food[k].Y && x == wall[l].X && y == wall[l].Y)
+					if ((x == oji[j].X && y == oji[j].Y) || (x == food[k].X && y == food[k].Y) || (x == wall[l].X && y == wall[l].Y))
 					{
 						bool found = true;
 						while (found == true)
 						{
 							x = 1 + (rand() % (wx - 2));
 							y = 1 + (rand() % (hy - 2));
-							if (x != oji[j].X && y != oji[j].Y && x != food[k].X && y != food[k].Y && x == wall[l].X && y == wall[l].Y)
+							if ((x != oji[j].X && y != oji[j].Y) && (x != food[k].X && y != food[k].Y) && (x == wall[l].X && y == wall[l].Y))
 								found = false;
 						}
 					}
@@ -353,18 +345,18 @@ void initfood()
 	{
 		SHORT x = 1 + (rand() % (wx - 2));
 		SHORT y = 1 + (rand() % (hy - 2));
-		for (int j = 0; j < Tlength; j++)
+		for (int j = 0; j <= Tlength; j++)
 		{
-			for (size_t i = 0; i < wallcount; i++)
+			for (size_t k = 0; k <= wallcount; k++)
 			{
-				if (x == oji[j].X && y == oji[j].Y && x == wall[i].X && y == wall[i].Y)
+				if ((x == oji[j].X && y == oji[j].Y) || (x == wall[k].X && y == wall[k].Y))
 				{
 					bool found = true;
 					while (found == true)
 					{
 						x = 1 + (rand() % (wx - 2));
 						y = 1 + (rand() % (hy - 2));
-						if (x != oji[j].X && y != oji[j].Y && x != wall[i].X && y != wall[i].Y)
+						if ((x != oji[j].X && y != oji[j].Y) && (x != wall[k].X && y != wall[k].Y))
 							found = false;
 					}
 				}
@@ -376,9 +368,9 @@ void initfood()
 
 void initwall()
 {
-	if (wallstat == true)
+	if (wallstat == true && wallcount > 0)
 	{
-		for (int i = wallcount; i <= wallcount; i++)
+		for (int i = wallcount-1; i < wallcount; i++)
 		{
 			SHORT x = 2 + (rand() % (wx - 3));
 			SHORT y = 2 + (rand() % (hy - 4));
@@ -386,15 +378,17 @@ void initwall()
 			{
 				for (int k = 0; k < foodcount; k++)
 				{
-					if (x == oji[j].X && y == oji[j].Y && x == food[k].X && y == food[k].Y && (x - oji[0].X < 4) & (y - oji[0].Y < 4))
+					if ((x == oji[j].X && y == oji[j].Y) || (x == food[k].X && y == food[k].Y) || ((x - oji[0].X < 4) && (y - oji[0].Y < 4)))
 					{
 						bool found = true;
 						while (found == true)
 						{
 							x = 1 + (rand() % (wx - 2));
 							y = 1 + (rand() % (hy - 2));
-							if (x != oji[j].X && y != oji[j].Y && x != food[k].X && y != food[k].Y && (x - oji[0].X > 4) & (y - oji[0].Y > 4))
+							if ((x != oji[j].X && y != oji[j].Y) && (x != food[k].X && y != food[k].Y) && ((x - oji[0].X > 4) && (y - oji[0].Y > 4)))
+							{
 								found = false;
+							}
 						}
 					}
 				}
@@ -435,7 +429,7 @@ void oji_move()
 				Gameover = true;
 				normalMode = false;
 				play = false;
-				//game_setup();
+				resetgame();
 			}
 		}
 	}
@@ -461,7 +455,7 @@ void oji_move()
 				Gameover = true;
 				normalMode = false;
 				play = false;
-				//game_setup();
+				resetgame();
 			}
 		}
 	}
@@ -487,7 +481,7 @@ void oji_move()
 				Gameover = true;
 				normalMode = false;
 				play = false;
-				//game_setup();
+				resetgame();
 			}
 		}
 	}
@@ -513,7 +507,7 @@ void oji_move()
 				Gameover = true;
 				normalMode = false;
 				play = false;
-				//game_setup();
+				resetgame();
 			}
 		}
 	}
@@ -535,7 +529,7 @@ void board()
 		}
 	}
 }
-//mutex mtx;
+
 void collisioncheck()
 {
 	for (size_t i = 0; i < foodcount; i++)
@@ -560,45 +554,51 @@ void collisioncheck()
 				atefood--;
 				if (atefood < 1)
 				{
-					initwall();
 					wallcount++;
+					initwall();
 					atefood = 3;
 				}
 			}
 		}
 	}
 
-	for (size_t i = 0; i < wallcount; i++)
+	if (wallstat == true && wallcount > 0)
 	{
-		if (oji[0].X == wall[i].X && oji[0].Y == wall[i].Y)
+		for (int i = 0; i < wallcount; i++)
 		{
-			HP--;
-			if (HP == 0)
+			if (oji[0].X == wall[i].X && oji[0].Y == wall[i].Y)
 			{
-				thread w(Beep, 1175, 200);
-				w.detach();
-				savescore();
-				play = false;
-				normalMode = false;
-				Gameover = true;
-				//game_setup();
+				HP--;
+				if (HP == 0)
+				{
+					thread w(Beep, 1175, 200);
+					w.detach();
+					savescore();
+					play = false;
+					normalMode = false;
+					Gameover = true;
+					resetgame();
+				}
 			}
 		}
 	}
 
-	if (oji[0].X == item[0].X && oji[0].Y == item[0].Y)
+	if (itemstat == true)
 	{
-		thread a(Beep, 500, 100);
-		a.detach();
-		itemstat = false;
-		int peritem[10] = { 1,1,2,1,3,1,2,3,2,3 }; // 1 slow  2 hp 3 shorter
-		int r = 1 + rand() % 10;
-		if (peritem[r] == 1 && speed < 80)
-			speed += 0.5;
-		else if (peritem[r] == 2 && HP < 5)
-			HP++;
-		else if (peritem[r] == 3 && Tlength > 3)
-			Tlength -= 2;
+		if (oji[0].X == item[0].X && oji[0].Y == item[0].Y)
+		{
+			thread a(Beep, 500, 100);
+			a.detach();
+			int peritem[10] = { 1,1,2,1,3,1,2,3,2,3 }; // 1 slow  2 hp 3 shorter
+			int r = 1 + rand() % 10;
+			if (peritem[r] == 1 && speed < 80)
+				speed += 0.5;
+			else if (peritem[r] == 2 && HP < 5)
+				HP++;
+			else if (peritem[r] == 3 && Tlength > 3)
+				Tlength -= 2;
+			itemstat = false;
+		}
 	}
 }
 
@@ -616,7 +616,7 @@ void selfhits()
 				normalMode = false;
 				play = false;
 				Gameover = true;
-				//game_setup();
+				resetgame();
 			}
 		}
 	}
@@ -786,8 +786,6 @@ void scorecount()
 	const char* tails = "TAIL LENGTH = ";
 	string t = to_string(Tlength-2);
 	const char* tchar = t.c_str();
-
-
 	for (size_t i = 0; i < strlen(scoretext); i++)
 	{
 		consoleBuffer[(px + i) + screen_x * py].Char.AsciiChar = scoretext[i];
@@ -1112,4 +1110,20 @@ void boardpage()
 		cout << "PRESS ENTER : BACK TO MAIN MENU";
 		runround++;
 	}
+}
+
+void resetgame()
+{
+	wallstat = false;
+	itemstat = false;
+	HP = 2;
+	foodcount = 1;
+	wallcount = 0;
+	atefood = 3;
+	Tlength = 1;
+	speed = 80;
+	dir = STOP;
+	init_oji();
+	initfood();
+	initwall();
 }
